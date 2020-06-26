@@ -154,11 +154,11 @@ public class MainActivity extends AppCompatActivity {
      public void criaBancoDados(){
 
          try {
-             //Inicindo banco de dados
+
              SQLiteDatabase bancoDados = openOrCreateDatabase("exibeFilmesMarvel", MODE_PRIVATE, null);
-             //vou guardar as notas
+
              bancoDados.execSQL("CREATE TABLE IF NOT EXISTS notasFilmes (ID INTEGER ,titulo VARCHAR, nota VARCHAR);");
-            //vou guardar os dados dos filmes
+
              bancoDados.execSQL("CREATE TABLE dadosFilmes (\n" +
                      "    ID     INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
                      "    titulo VARCHAR,\n" +
@@ -225,8 +225,7 @@ public class MainActivity extends AppCompatActivity {
             //abre o banco
             SQLiteDatabase bancoDados = openOrCreateDatabase("exibeFilmesMarvel", MODE_PRIVATE, null);
             bancoDados.execSQL("DELETE FROM dadosFilmes");
-           // bancoDados.execSQL("DELETE FROM notasFilmes");
-            Toast.makeText(getApplicationContext(), "Lista Limpa com Sucesso ", Toast.LENGTH_SHORT).show();
+             Toast.makeText(getApplicationContext(), "Lista Limpa com Sucesso ", Toast.LENGTH_SHORT).show();
 
         } catch (Exception e) {
             e.printStackTrace();
