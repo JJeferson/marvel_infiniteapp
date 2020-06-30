@@ -2,10 +2,12 @@ package com.a.marvel_infiniteapp;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.SearchView;
+//import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.SearchManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -13,6 +15,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -20,10 +25,12 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.SearchView;
 
 import com.a.marvel_infiniteapp.adapter.Adapter;
 import com.a.marvel_infiniteapp.model.modelo;
 import com.bumptech.glide.Glide;
+import com.miguelcatalan.materialsearchview.MaterialSearchView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -37,15 +44,15 @@ import java.util.List;
 
 public class listaMarvel extends AppCompatActivity {
 
-    private EditText pesquisa;
-    private Button btPesquisa;
-    private Button btVoltar;
+
     private TextView     textview;
     private RecyclerView recyclerView_ID;
+    private SearchView search;
+
 
 
     private List<modelo> listaFilmes = new ArrayList<>();
-    //  public static String[] ID_Posicao = {""};
+
 
     public static final String Reference_File = "ReferenceFile";
 
@@ -55,10 +62,8 @@ public class listaMarvel extends AppCompatActivity {
         setContentView(R.layout.lista_marvel);
 
 
-        pesquisa      =      (EditText) findViewById(R.id.pesquisa);
-        btPesquisa    =      (Button) findViewById(R.id.btPesquisa);
-        btVoltar    =      (Button) findViewById(R.id.btVoltar);
-        textview      =      (TextView) findViewById(R.id.textview);
+        textview           =      (TextView) findViewById(R.id.textview);
+        search             =  findViewById(R.id.search);
 
         recyclerView_ID = (RecyclerView) findViewById(R.id.recyclerView_ID);
 
@@ -73,7 +78,6 @@ public class listaMarvel extends AppCompatActivity {
             textview.setText("Sem Conexão com internet!");
             textview.setTextColor(Color.RED);
         }
-        // textview.setText(testaConec);//sim ou nao
 
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
         recyclerView_ID.setLayoutManager(layoutManager);
@@ -85,31 +89,28 @@ public class listaMarvel extends AppCompatActivity {
         alimentaRecyclerView();
 
 
-        btVoltar.setOnClickListener(new View.OnClickListener() {
+        search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
-            public void onClick(View view) {
+            public boolean onQueryTextSubmit(String query) {
 
-                listaFilmes.clear();
-                alimentaRecyclerView();
 
-                adapter.notifyDataSetChanged();
+
+                return false;
 
             }
-        });
 
-
-        btPesquisa.setOnClickListener(new View.OnClickListener() {
+            final String[] textoDigitado = {""};
             @Override
-            public void onClick(View view) {
+            public boolean onQueryTextChange(String newText) {
+
+                textoDigitado[0] = newText.toUpperCase();
+
                 listaFilmes.clear();
-                pesquisa(pesquisa.getText().toString());
-                pesquisa.setText("");
-
+                pesquisa(textoDigitado[0]);
                 adapter.notifyDataSetChanged();
-
+                return true;
             }
         });
-
 
         //--------------------------------------------------------------
         //Evento Onclick
@@ -151,7 +152,41 @@ public class listaMarvel extends AppCompatActivity {
     }
 
 
-  public void dados_nota(final int posicao){
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.options_menu, menu);
+
+        // Associate searchable configuration with the SearchView
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        SearchView searchView = (SearchView) menu.findItem(R.id.search).getActionView();
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+            @Override
+            public boolean onQueryTextChange(String newText) {
+
+                final Adapter adapter = new Adapter(listaFilmes);
+                listaFilmes.clear();
+                String textoDigitado = newText.toUpperCase();
+                pesquisa(textoDigitado);
+                adapter.notifyDataSetChanged();
+
+                return true;
+            }
+        });
+
+
+        return true;
+    }
+
+
+    public void dados_nota(final int posicao){
 
 
       //Criando o AlertDialog
@@ -193,10 +228,18 @@ public class listaMarvel extends AppCompatActivity {
                    if(modelo.getNota()==null || modelo.getNota()=="")
                   {
                       insereNota(modelo.getID(),modelo.getTitulo(),recebeNota);
+                      final Adapter adapter = new Adapter(listaFilmes);
+                      listaFilmes.clear();
+                      alimentaRecyclerView();
+                      adapter.notifyDataSetChanged();
+
 
                   }else {
                     alteraNota(modelo.getTitulo(),recebeNota);
-
+                       final Adapter adapter = new Adapter(listaFilmes);
+                       listaFilmes.clear();
+                       alimentaRecyclerView();
+                       adapter.notifyDataSetChanged();
                   }
 
 
